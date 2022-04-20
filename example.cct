@@ -1,0 +1,10 @@
++-> node a
+  +-> node b # comment edge a->b
+
++-< node b
+  +-< node c # comment edge c->b
+
++-> node c
+  +-> node d #1
+  +-> node e #2
+  +-> node f #3

@@ -9,3 +9,23 @@ One useful usecase:
 - Load .gml file in [yEd](https://www.yworks.com/products/yed).
 - In yEd go to `Ctrl+A -> Tools -> Fit node to label`, then `Layout -> Hierarchical`
 Now your can move nodes as you like and create some useful painted call graphs.
+
+Example cctree graph:
+
+(![example.cct](example.cct))
+```
++-> node a
+  +-> node b # comment edge a->b
+
++-< node b
+  +-< node c # comment edge c->b
+
++-> node c
+  +-> node d #1
+  +-> node e #2
+  +-> node f #3
+```
+
+Example gml visualization in yEd:
+
+![example.png](example.png)

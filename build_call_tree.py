@@ -121,11 +121,19 @@ def cctree_to_link_nodes_and_edges(path):
 
 def nodes_and_edges_to_tree(nodes, links, dot_path):
     gr = pydot.Dot(graph_type='digraph')
+    counter = 0
+    nodemap = {}
+
     for node in nodes:
-        nod = pydot.Node(node, label=node)
+        if node in nodemap:
+            continue
+        nodemap[node] = str(counter)
+        counter += 1
+
+        nod = pydot.Node(nodemap[node], label=node)
         gr.add_node(nod)
     for link in links:
-        edge = pydot.Edge(link[0], link[1], label=link[2])
+        edge = pydot.Edge(nodemap[link[0]], nodemap[link[1]], label=link[2])
         gr.add_edge(edge)
     gr.write(dot_path)
 

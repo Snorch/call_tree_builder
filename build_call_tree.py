@@ -41,14 +41,27 @@ Or:
   +-< node a
     +-< node b # comment for edge b->a
 Edge comment should be separated by '#'.
+
+Adding shape=some_shape in comments will affect node shape.
 '''
 def data_split(data):
-    if '#' in data:
-        tmp = data.split('#', 1)
-    else:
-        tmp = [data]
+    shape = ''
+    comment = ''
 
-    return tmp[0].strip(), ''.join(tmp[1:]).strip()
+    if '#' in data:
+        name, comment = data.split('#', 1)
+        name = name.strip()
+        comments = comment.split()
+        for i in range(len(comments)):
+            if comments[i].startswith('shape='):
+                shape = comments[i][6:].strip()
+                comments = comments[:i] + comments[i + 1:]
+                break
+        comment = ' '.join(comments)
+    else:
+        name = data.strip()
+
+    return name, comment, shape
 
 
 def cctree_to_link_nodes_and_edges(path):
@@ -72,10 +85,11 @@ def cctree_to_link_nodes_and_edges(path):
                 return [], []
             offs.append(off)
 
-        nodes = set()
+        nodes = {}
         for i, _ in enumerate(lines):
-            node, _ = data_split(lines[i][offs[i]+4:].strip())
-            nodes.add(node)
+            node, _, shape = data_split(lines[i][offs[i]+4:].strip())
+            if node not in nodes or nodes[node] == '':
+                nodes[node] = shape
 
         links = []
         root = 0
@@ -90,9 +104,9 @@ def cctree_to_link_nodes_and_edges(path):
                     return [], []
                 else:
                     found = True
-                    a, comment_a = data_split(lines[i][offs[i]+4:].strip())
+                    a, comment_a, _ = data_split(lines[i][offs[i]+4:].strip())
 
-                    b, _ = data_split(lines[j][offs[j]+4:].strip())
+                    b, _, _ = data_split(lines[j][offs[j]+4:].strip())
                     edge = []
                     if up:
                         edge=[a, b, comment_a]
@@ -116,7 +130,7 @@ def cctree_to_link_nodes_and_edges(path):
                     eprint('Bad format of CCTree file:', lines[0])
                     return [], []
 
-        return list(nodes), links
+        return list(nodes.items()), links
 
 
 def nodes_and_edges_to_tree(nodes, links, dot_path):
@@ -124,13 +138,16 @@ def nodes_and_edges_to_tree(nodes, links, dot_path):
     counter = 0
     nodemap = {}
 
-    for node in nodes:
+    for node, shape in nodes:
+        if shape == '':
+            shape = 'rectangle'
+
         if node in nodemap:
             continue
         nodemap[node] = str(counter)
         counter += 1
 
-        nod = pydot.Node(nodemap[node], label=node)
+        nod = pydot.Node(nodemap[node], label=node, shape=shape)
         gr.add_node(nod)
     for link in links:
         edge = pydot.Edge(nodemap[link[0]], nodemap[link[1]], label=link[2])

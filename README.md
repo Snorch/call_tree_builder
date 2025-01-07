@@ -24,6 +24,11 @@ Example cctree graph:
   +-> node d #1
   +-> node e #2
   +-> node f #3
+
++-> A #
+  +-> if (condition) # shape=ellipse
+    +-> B # true
+    +-> C # false
 ```
 
 Example gml visualization in yEd:

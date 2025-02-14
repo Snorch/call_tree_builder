@@ -45,8 +45,9 @@ Edge comment should be separated by '#'.
 Adding shape=some_shape in comments will affect node shape.
 '''
 def data_split(data):
-    shape = ''
     comment = ''
+    shape = None
+    color = None
 
     if '#' in data:
         name, comment = data.split('#', 1)
@@ -57,11 +58,15 @@ def data_split(data):
                 shape = comments[i][6:].strip()
                 comments = comments[:i] + comments[i + 1:]
                 break
+            if comments[i].startswith('color='):
+                color = comments[i][6:].strip()
+                comments = comments[:i] + comments[i + 1:]
+                break
         comment = ' '.join(comments)
     else:
         name = data.strip()
 
-    return name, comment, shape
+    return name, comment, shape, color
 
 
 def cctree_to_link_nodes_and_edges(path):
@@ -87,9 +92,13 @@ def cctree_to_link_nodes_and_edges(path):
 
         nodes = {}
         for i, _ in enumerate(lines):
-            node, _, shape = data_split(lines[i][offs[i]+4:].strip())
-            if node not in nodes or nodes[node] == '':
-                nodes[node] = shape
+            node, _, shape, color = data_split(lines[i][offs[i]+4:].strip())
+            if node not in nodes:
+                nodes[node] = {}
+            if shape and 'shape' not in nodes[node]:
+                nodes[node]['shape'] = shape
+            if color and 'color' not in nodes[node]:
+                nodes[node]['color'] = color
 
         links = []
         root = 0
@@ -104,9 +113,9 @@ def cctree_to_link_nodes_and_edges(path):
                     return [], []
                 else:
                     found = True
-                    a, comment_a, _ = data_split(lines[i][offs[i]+4:].strip())
+                    a, comment_a, _, _ = data_split(lines[i][offs[i]+4:].strip())
 
-                    b, _, _ = data_split(lines[j][offs[j]+4:].strip())
+                    b, _, _, _ = data_split(lines[j][offs[j]+4:].strip())
                     edge = []
                     if up:
                         edge=[a, b, comment_a]
@@ -138,16 +147,20 @@ def nodes_and_edges_to_tree(nodes, links, dot_path):
     counter = 0
     nodemap = {}
 
-    for node, shape in nodes:
-        if shape == '':
-            shape = 'rectangle'
+    for node, options in nodes:
+        shape = 'rectangle'
+        if 'shape' in options:
+            shape = options['shape']
+        color = '"#ffcc00"'
+        if 'color' in options:
+            color = '"' + options['color'] + '"'
 
         if node in nodemap:
             continue
         nodemap[node] = str(counter)
         counter += 1
 
-        nod = pydot.Node(nodemap[node], label=node, shape=shape)
+        nod = pydot.Node(nodemap[node], label=node, shape=shape, color=color)
         gr.add_node(nod)
     for link in links:
         edge = pydot.Edge(nodemap[link[0]], nodemap[link[1]], label=link[2])

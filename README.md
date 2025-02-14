@@ -29,6 +29,8 @@ Example cctree graph:
   +-> if (condition) # shape=ellipse
     +-> B # true
     +-> C # false
+
++-> A # color=#00ccff
 ```
 
 Example gml visualization in yEd:

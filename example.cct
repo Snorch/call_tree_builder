@@ -13,3 +13,5 @@
   +-> if (condition) # shape=ellipse
     +-> B # true
     +-> C # false
+
++-> A # color=#00ccff

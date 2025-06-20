@@ -33,6 +33,24 @@ def cleanup_cctree_lines(lines):
     return new_lines
 
 
+def name_to_color(color):
+    if color == 'orange':
+        return '#ff9900'
+    if color == 'blue':
+        return '#66ccff'
+    if color == 'green':
+        return '#99cc00'
+    if color == 'red':
+        return '#ff6666'
+    if color == 'gray':
+        return '#c0c0c0'
+    if color == 'pink':
+        return '#ff99cc'
+    if color == 'purple':
+        return '#cc99ff'
+    return color
+
+
 '''
 This is a node/edge labeling format:
   +-> node a
@@ -59,7 +77,7 @@ def data_split(data):
                 comments = comments[:i] + comments[i + 1:]
                 break
             if comments[i].startswith('color='):
-                color = comments[i][6:].strip()
+                color = name_to_color(comments[i][6:].strip())
                 comments = comments[:i] + comments[i + 1:]
                 break
         comment = ' '.join(comments)
